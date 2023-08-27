@@ -1,0 +1,31 @@
+$computerNames = @(
+    "Компьютер1",
+    "Компьютер2",
+    # ... добавьте остальные имена компьютеров сюда
+)
+
+$reportFilePath = "C:\Path\To\Report.txt"
+
+$report = @()
+
+foreach ($computerName in $computerNames) {
+    $result = $null
+
+    try {
+        $status = Test-Connection -ComputerName $computerName -Count 1 -ErrorAction Stop
+        $result = "Успешно"
+        Stop-Computer -ComputerName $computerName -Force -ErrorAction Stop
+    } catch {
+        $result = "Ошибка: $_"
+    }
+
+    $reportEntry = [PSCustomObject]@{
+        ComputerName = $computerName
+        Status = $result
+    }
+
+    $report += $reportEntry
+}
+
+$report | Export-Csv -Path $reportFilePath -NoTypeInformation
+Write-Host "Отчет о выполнении операций сохранен в $reportFilePath"
